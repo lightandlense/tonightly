@@ -1,6 +1,7 @@
 .env*
 node_modules/
 dist/
+dist-lambda/
 .aws-sam/
 test-results/
 playwright-report/

@@ -8,10 +8,13 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "deploy": "node scripts/deploy.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.1161.0",
+    "@aws-sdk/client-dynamodb": "^3.1161.0",
+    "@aws-sdk/lib-dynamodb": "^3.1161.0",
     "@noriginmedia/norigin-spatial-navigation": "^3.4.0",
     "@reduxjs/toolkit": "^2.13.0",
     "motion": "^14.9.0",

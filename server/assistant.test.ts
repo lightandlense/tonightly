@@ -95,6 +95,15 @@ describe('handleChat', () => {
     expect((await handleChat({ sessionId: 'session-1', message: 'hi' }, d)).status).toBe(429)
   })
 
+  it('applies the daily caps before calling the model', async () => {
+    const converse = vi.fn(async () => say('Hi.'))
+    const limit = vi.fn(async (ip: string) => (ip === 'busy' ? 'Limit reached.' : null))
+    const r = await handleChat({ sessionId: 'session-1', message: 'hi' }, deps({ converse, limit }), 'busy')
+    expect(r).toMatchObject({ status: 429, body: { error: 'Limit reached.' } })
+    expect(converse).not.toHaveBeenCalled()
+    expect((await handleChat({ sessionId: 'session-1', message: 'hi' }, deps({ converse, limit }), 'ok')).status).toBe(200)
+  })
+
   it('honors the kill switch and hides model errors', async () => {
     expect((await handleChat({ sessionId: 'session-1', message: 'hi' }, deps({ disabled: true }))).status).toBe(503)
     const broken = deps({ converse: async () => { throw new Error('AccessDenied arn:secret') } })

@@ -23,12 +23,14 @@ export interface Deps {
   system: string
   /** Turned on with KILL_SWITCH=1 to stop all model calls. */
   disabled?: boolean
+  /** Daily usage caps. Returns a message when over, or null. */
+  limit?: (ip: string) => Promise<string | null>
 }
 
 type Res = { status: number; body: { ok: true; data: unknown } | { ok: false; error: string } }
 const fail = (status: number, error: string): Res => ({ status, body: { ok: false, error } })
 
-export async function handleChat(body: unknown, deps: Deps): Promise<Res> {
+export async function handleChat(body: unknown, deps: Deps, ip = 'local'): Promise<Res> {
   if (deps.disabled) return fail(503, 'The assistant is resting right now. Browsing still works.')
   const { sessionId, message } = (body ?? {}) as { sessionId?: unknown; message?: unknown }
   if (typeof sessionId !== 'string' || !/^[A-Za-z0-9-]{8,64}$/.test(sessionId)) return fail(400, 'Bad session.')
@@ -36,10 +38,11 @@ export async function handleChat(body: unknown, deps: Deps): Promise<Res> {
   if (!text) return fail(400, 'Say something first.')
   if (text.length > MAX_MESSAGE) return fail(400, `Keep it under ${MAX_MESSAGE} characters.`)
 
-  const session = (await deps.sessions.get(sessionId)) ?? { messages: [], seen: {}, turns: 0 }
-  if (session.turns >= MAX_TURNS) return fail(429, 'This chat is full. Reload the page to start a new one.')
-
   try {
+    const session = (await deps.sessions.get(sessionId)) ?? { messages: [], seen: {}, turns: 0 }
+    if (session.turns >= MAX_TURNS) return fail(429, 'This chat is full. Reload the page to start a new one.')
+    const over = await deps.limit?.(ip)
+    if (over) return fail(429, over)
     const r = await runTurn({ session, message: text, system: deps.system, converse: deps.converse, tmdb: deps.tmdb })
     await deps.sessions.put(sessionId, r.session)
     if (r.dropped.length) console.warn('grounding dropped', sessionId, r.dropped)
