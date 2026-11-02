@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit'
+import { say } from '../speech'
 import { titleKey, type Title } from '../tmdb'
 import { openDetail } from './slices'
 
@@ -16,6 +17,8 @@ export interface ChatState {
   messages: ChatMessage[]
   /** The assistant's latest picks, shown as the "For tonight" row on home. */
   tonight: Title[]
+  /** Read replies aloud. Turns on when you talk to it. */
+  voice: boolean
 }
 
 interface Answer {
@@ -27,7 +30,7 @@ interface Answer {
 // One chat per page load. The server keeps the history for this id.
 const SESSION_ID = crypto.randomUUID()
 
-export const sendMessage = createAsyncThunk<Answer, string, { rejectValue: string }>('chat/send', async (text, { dispatch, rejectWithValue }) => {
+export const sendMessage = createAsyncThunk<Answer, string, { rejectValue: string; state: { chat: ChatState } }>('chat/send', async (text, { dispatch, getState, rejectWithValue }) => {
   let body: { ok: boolean; data?: Answer; error?: string }
   try {
     const res = await fetch('/api/chat', {
@@ -41,12 +44,13 @@ export const sendMessage = createAsyncThunk<Answer, string, { rejectValue: strin
   }
   if (!body.ok || !body.data) return rejectWithValue(body.error ?? 'Something went wrong. Try again.')
   const answer = body.data
+  if (getState().chat.voice) say(answer.reply)
   // The assistant can act on the UI: open a title's page. Back returns to that title in the "For tonight" row.
   if (answer.open) dispatch(openDetail({ title: answer.open, returnKey: `card-tonight-${titleKey(answer.open)}` }))
   return answer
 })
 
-const initial: ChatState = { open: false, pending: false, messages: [], tonight: [] }
+const initial: ChatState = { open: false, pending: false, messages: [], tonight: [], voice: false }
 let nextId = 1
 
 export const chatSlice = createSlice({
@@ -55,6 +59,9 @@ export const chatSlice = createSlice({
   reducers: {
     setChatOpen: (s, a: PayloadAction<boolean>) => {
       s.open = a.payload
+    },
+    setVoice: (s, a: PayloadAction<boolean>) => {
+      s.voice = a.payload
     },
   },
   extraReducers: (b) => {
@@ -78,4 +85,4 @@ export const chatSlice = createSlice({
   },
 })
 
-export const { setChatOpen } = chatSlice.actions
+export const { setChatOpen, setVoice } = chatSlice.actions

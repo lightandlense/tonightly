@@ -89,3 +89,28 @@ test('shows the server error and keeps the chat usable', async ({ page }) => {
   await expect(page.getByTestId('chat')).toContainText('This chat is full')
   await expect(page.getByRole('textbox', { name: 'Ask for something to watch' })).toBeFocused()
 })
+
+test('Voice on reads the reply aloud, Voice off does not', async ({ page }) => {
+  // Record what the page asks the browser to say instead of playing audio.
+  await page.addInitScript(() => {
+    const spoken: string[] = []
+    Object.assign(window, { spoken })
+    speechSynthesis.speak = (u: SpeechSynthesisUtterance) => void spoken.push(u.text)
+  })
+  await page.reload()
+  await expect(page.locator('[data-testid="card"].is-focused')).toHaveCount(1)
+  await fakeChat(page)
+  await page.keyboard.press('/')
+  const toggle = page.getByRole('button', { name: /Voice/ })
+  await expect(toggle).toHaveAttribute('aria-pressed', 'false')
+
+  await page.keyboard.type('quiet please')
+  await page.keyboard.press('Enter')
+  await expect(page.getByTestId('chat')).toContainText('Here are two')
+  await toggle.click()
+  await expect(toggle).toHaveText('Voice on')
+  await page.getByRole('textbox', { name: 'Ask for something to watch' }).fill('talk to me')
+  await page.getByRole('textbox', { name: 'Ask for something to watch' }).press('Enter')
+  await expect(page.locator('.msg-assistant')).toHaveCount(2)
+  expect(await page.evaluate(() => (window as unknown as { spoken: string[] }).spoken)).toEqual(['Here are two funny space movies.'])
+})

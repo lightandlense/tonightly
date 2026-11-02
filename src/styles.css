@@ -140,6 +140,7 @@ kbd { font: inherit; font-size: 0.8em; padding: 0.1em 0.45em; margin-left: 0.4em
 }
 .chat-head { display: flex; align-items: center; justify-content: space-between; padding: 1.4em 1.4em 0.6em; }
 .chat-head h2 { font-size: 1.2em; }
+.chat-head-actions { display: flex; gap: 0.5em; }
 .chat-log { list-style: none; margin: 0; padding: 0.6em 1.4em; overflow-y: auto; display: grid; align-content: start; gap: 0.9em; scrollbar-width: none; }
 .msg p { line-height: 1.5; }
 .msg-user { justify-self: end; max-width: 85%; padding: 0.6em 1em; border-radius: 1em 1em 0.2em 1em; background: rgb(255 255 255 / 0.1); }

@@ -46,3 +46,18 @@ export function useSpeech(onHeard: (text: string) => void) {
 
   return { supported: !!Ctor, listening, error, start, stop }
 }
+
+// ponytail: the browser's own voice reads replies until Polly is available (AWS region lock, 2026-11-01).
+export const canSay = 'speechSynthesis' in globalThis
+
+export function say(text: string) {
+  if (!canSay) return
+  speechSynthesis.cancel()
+  const u = new SpeechSynthesisUtterance(text)
+  const voices = speechSynthesis.getVoices().filter((v) => v.lang === 'en-US')
+  u.voice = voices.find((v) => /natural|neural/i.test(v.name)) ?? voices[0] ?? null
+  u.lang = 'en-US'
+  speechSynthesis.speak(u)
+}
+
+export const hush = () => canSay && speechSynthesis.cancel()

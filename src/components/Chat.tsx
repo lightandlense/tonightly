@@ -1,9 +1,9 @@
 import { FocusContext, setFocus, useFocusable } from '@noriginmedia/norigin-spatial-navigation'
 import { motion } from 'motion/react'
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
-import { sendMessage, setChatOpen } from '../state/chat'
+import { sendMessage, setChatOpen, setVoice } from '../state/chat'
 import { useAppDispatch, useAppSelector } from '../state/store'
-import { useSpeech } from '../speech'
+import { canSay, hush, useSpeech } from '../speech'
 import { Card } from './Card'
 import { FocusButton } from './FocusButton'
 
@@ -29,7 +29,7 @@ function ChatInput({ value, onChange, onSubmit }: { value: string; onChange: (v:
 
 export function Chat() {
   const dispatch = useAppDispatch()
-  const { messages, pending } = useAppSelector((s) => s.chat)
+  const { messages, pending, voice } = useAppSelector((s) => s.chat)
   const [text, setText] = useState('')
   const log = useRef<HTMLOListElement>(null)
   const { ref, focusKey } = useFocusable({ focusKey: 'CHAT', isFocusBoundary: true, trackChildren: true })
@@ -41,7 +41,15 @@ export function Chat() {
     dispatch(sendMessage(m))
   }
   const close = () => dispatch(setChatOpen(false))
-  const speech = useSpeech(send)
+  const speech = useSpeech((heard) => {
+    // Talking to it means you probably want it to talk back.
+    if (canSay) dispatch(setVoice(true))
+    send(heard)
+  })
+  const toggleVoice = () => {
+    if (voice) hush()
+    dispatch(setVoice(!voice))
+  }
 
   useEffect(() => {
     setFocus('chat-input')
@@ -72,9 +80,16 @@ export function Chat() {
       >
         <div className="chat-head">
           <h2>Ask Tonightly</h2>
-          <FocusButton focusKey="chat-close" onPress={close}>
-            Close
-          </FocusButton>
+          <div className="chat-head-actions">
+            {canSay && (
+              <FocusButton focusKey="chat-voice" onPress={toggleVoice} pressed={voice}>
+                Voice {voice ? 'on' : 'off'}
+              </FocusButton>
+            )}
+            <FocusButton focusKey="chat-close" onPress={close}>
+              Close
+            </FocusButton>
+          </div>
         </div>
         <ol className="chat-log" ref={log} aria-live="polite" aria-relevant="additions">
           {!messages.length && <li className="msg msg-hint">Try "a funny movie under two hours" or "something like Hot Rod".</li>}
