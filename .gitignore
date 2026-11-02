@@ -1,0 +1,6 @@
+.env*
+node_modules/
+dist/
+.aws-sam/
+test-results/
+playwright-report/
