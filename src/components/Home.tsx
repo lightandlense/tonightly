@@ -1,14 +1,17 @@
 import { FocusContext, setFocus, useFocusable } from '@noriginmedia/norigin-spatial-navigation'
 import { useEffect } from 'react'
 import { useHomeRowsQuery } from '../state/api'
-import { useAppSelector } from '../state/store'
+import { setChatOpen } from '../state/chat'
+import { useAppDispatch, useAppSelector } from '../state/store'
 import { FocusButton } from './FocusButton'
 import { Hero } from './Hero'
 import { Row } from './Row'
 
 export function Home({ hidden }: { hidden: boolean }) {
   const { data, isLoading, isError, refetch } = useHomeRowsQuery()
+  const dispatch = useAppDispatch()
   const list = useAppSelector((s) => s.list)
+  const tonight = useAppSelector((s) => s.chat.tonight)
   const focusedTitle = useAppSelector((s) => s.ui.hero)
   const { ref, focusKey } = useFocusable({ focusKey: 'HOME', saveLastFocusedChild: true, trackChildren: true })
   const loaded = !!data
@@ -21,12 +24,21 @@ export function Home({ hidden }: { hidden: boolean }) {
     if (isError) setFocus('retry')
   }, [isError])
 
-  const rows = data ? (list.length ? [{ id: 'my-list', label: 'My list', titles: list }, ...data] : data) : []
+  const extra = [
+    { id: 'tonight', label: 'For tonight', titles: tonight },
+    { id: 'my-list', label: 'My list', titles: list },
+  ].filter((r) => r.titles.length)
+  const rows = data ? [...extra, ...data] : []
 
   return (
     <FocusContext.Provider value={focusKey}>
-      {/* inert while the detail page is open, so Tab and screen readers stay inside the detail page */}
+      {/* inert while the detail page or chat is open, so Tab and screen readers stay inside it */}
       <main className="home" inert={hidden}>
+        <div className="ask">
+          <FocusButton focusKey="ask" onPress={() => dispatch(setChatOpen(true))}>
+            Ask Tonightly <kbd>/</kbd>
+          </FocusButton>
+        </div>
         <Hero title={focusedTitle ?? data?.[0]?.titles[0] ?? null} />
         <div ref={ref} className="rows" data-testid="rows">
           {isLoading && <p className="status">Loading tonight's picks…</p>}

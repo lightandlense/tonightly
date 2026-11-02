@@ -1,6 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { useDispatch, useSelector } from 'react-redux'
 import { tmdbApi } from './api'
+import { chatSlice } from './chat'
 import { listSlice, uiSlice } from './slices'
 import type { Title } from '../tmdb'
 
@@ -19,7 +20,7 @@ function loadList(): Title[] {
 
 export function makeStore(list: Title[] = loadList()) {
   const store = configureStore({
-    reducer: { ui: uiSlice.reducer, list: listSlice.reducer, [tmdbApi.reducerPath]: tmdbApi.reducer },
+    reducer: { ui: uiSlice.reducer, list: listSlice.reducer, chat: chatSlice.reducer, [tmdbApi.reducerPath]: tmdbApi.reducer },
     preloadedState: { list },
     middleware: (getDefault) => getDefault().concat(tmdbApi.middleware),
   })

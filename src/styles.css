@@ -27,7 +27,7 @@ h1, h2, p { margin: 0; }
 .status { padding: 2em var(--gutter); color: var(--muted); display: grid; gap: 1em; justify-items: start; }
 
 /* Home: fixed hero on top, rows scroll underneath (TV layout) */
-.home { height: 100vh; display: grid; grid-template-rows: 54vh 1fr; }
+.home { position: relative; height: 100vh; display: grid; grid-template-rows: 54vh 1fr; }
 
 .hero { position: relative; overflow: hidden; }
 .hero-inner { position: absolute; inset: 0; }
@@ -125,6 +125,37 @@ h1, h2, p { margin: 0; }
 .trailer { position: absolute; inset: 0; z-index: 20; background: #000; display: flex; flex-direction: column; }
 .trailer iframe { flex: 1; width: 100%; border: 0; }
 .trailer-bar { padding: 1em var(--gutter); }
+
+/* Assistant */
+.ask { position: absolute; top: 3vh; right: var(--gutter); z-index: 3; }
+kbd { font: inherit; font-size: 0.8em; padding: 0.1em 0.45em; margin-left: 0.4em; border-radius: 4px; border: 1px solid currentColor; opacity: 0.7; }
+
+.chat {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 12;
+  width: min(34rem, 100vw);
+  display: grid; grid-template-rows: auto 1fr auto auto;
+  background: #121218;
+  border-left: 1px solid rgb(255 255 255 / 0.08);
+  box-shadow: -30px 0 60px rgb(0 0 0 / 0.5);
+}
+.chat-head { display: flex; align-items: center; justify-content: space-between; padding: 1.4em 1.4em 0.6em; }
+.chat-head h2 { font-size: 1.2em; }
+.chat-log { list-style: none; margin: 0; padding: 0.6em 1.4em; overflow-y: auto; display: grid; align-content: start; gap: 0.9em; scrollbar-width: none; }
+.msg p { line-height: 1.5; }
+.msg-user { justify-self: end; max-width: 85%; padding: 0.6em 1em; border-radius: 1em 1em 0.2em 1em; background: rgb(255 255 255 / 0.1); }
+.msg-assistant { max-width: 95%; }
+.msg-hint, .msg-pending { color: var(--dim); }
+.msg-error p { color: var(--accent); }
+.chat-picks { display: flex; gap: 0.8em; padding: 0.8em 0.2em 0.4em; }
+.chat-picks .card { width: 7.5em; }
+.chat-note { padding: 0 1.4em; color: var(--accent); }
+.chat-compose { display: flex; gap: 0.6em; padding: 1em 1.4em 1.4em; }
+.chat-text {
+  flex: 1; min-width: 0; font: inherit; color: var(--text);
+  padding: 0.7em 1em; border-radius: 999px; outline: none;
+  border: 2px solid rgb(255 255 255 / 0.25); background: rgb(255 255 255 / 0.06);
+}
+.chat-text.is-focused { border-color: var(--accent); box-shadow: 0 0 0 3px rgb(245 176 65 / 0.3); }
 
 @media (prefers-reduced-motion: reduce) {
   .rows, .row-track { scroll-behavior: auto; }
