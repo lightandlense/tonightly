@@ -17,7 +17,9 @@ const only = arg('only', '')?.split(',').filter(Boolean)
 const rejudge = arg('rejudge', '')
 const saved = rejudge ? Object.fromEntries(JSON.parse(readFileSync(rejudge, 'utf8')).results.map((r) => [r.id, r])) : null
 // A partial or re-judged run never overwrites a full run's files.
-const label = rejudge ? `${basename(rejudge, '.json')}-rejudged` : basename(promptPath, '.md') + (only?.length ? '-partial' : '')
+const label = rejudge ? `${basename(rejudge, '.json')}-rejudged` : basename(promptPath, '.md') + (only?.length ? '-partial' : '') + arg('tag', '')
+// --server server-v1 replays an older copy of the assistant code (e.g. from git archive) for a fair baseline.
+const serverDir = arg('server', 'server')
 const date = new Date().toISOString().slice(0, 10)
 
 const env = loadEnv('development', '.', '')
@@ -25,9 +27,9 @@ process.env.AWS_PROFILE ??= env.AWS_PROFILE || 'tonightly'
 if (!env.TMDB_READ_TOKEN) throw new Error('TMDB_READ_TOKEN missing from .env.local')
 
 const vite = await createServer({ server: { middlewareMode: true }, appType: 'custom', logLevel: 'error' })
-const { runTurn } = await vite.ssrLoadModule('/server/assistant.ts')
+const { runTurn } = await vite.ssrLoadModule(`/${serverDir}/assistant.ts`)
 const { makeConverse } = await vite.ssrLoadModule('/server/bedrock.ts')
-const { makeTmdb } = await vite.ssrLoadModule('/server/tools.ts')
+const { makeTmdb } = await vite.ssrLoadModule(`/${serverDir}/tools.ts`)
 
 const system = readFileSync(promptPath, 'utf8')
 const rubric = readFileSync('evals/rubric.md', 'utf8')

@@ -1,0 +1,32 @@
+clear-01 ... 4.00
+clear-02 ... 5.00
+clear-03 ... 4.00
+clear-04 ... 4.00
+clear-05 ... 1.00
+clear-06 ... 5.00
+vague-01 ... 5.00
+vague-02 ... 5.00
+vague-03 ... 5.00
+vague-04 ... 4.00
+vague-05 ... 4.00
+repair-01 ... 5.00
+repair-02 ... 5.00
+repair-03 ... 5.00
+repair-04 ... 4.00
+repair-05 ... 5.00
+repair-06 ... 5.00
+halluc-01 ... 5.00
+halluc-02 ... 2.00
+halluc-03 ... 5.00
+halluc-04 ... 2.00
+halluc-05 ... 3.00
+scope-01 ... 5.00
+scope-02 ... 5.00
+scope-03 ... 5.00
+scope-04 ... 5.00
+memory-01 ... 5.00
+memory-02 ... 1.00
+memory-03 ... 5.00
+memory-04 ... 5.00
+
+Wrote evals/report-system-v1-oldcode-r3-2026-11-03.md
