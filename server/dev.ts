@@ -14,5 +14,5 @@ export function handle(body: unknown, env: Record<string, string>) {
     disabled: env.KILL_SWITCH === '1',
   }
   // Re-read each turn so prompt edits apply without a restart.
-  return handleChat(body, { ...deps, system: readFileSync('prompts/system-v1.md', 'utf8') })
+  return handleChat(body, { ...deps, system: readFileSync('prompts/system-v3.md', 'utf8') })
 }

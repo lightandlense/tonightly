@@ -60,6 +60,7 @@ export const TOOL_SPECS = [
             min_year: { type: 'integer' },
             max_year: { type: 'integer' },
             sort: { type: 'string', enum: ['popular', 'top_rated'] },
+            max_runtime: { type: 'integer', description: 'Movies only: longest runtime in minutes, for "under 90 minutes" or "something short".' },
           },
           required: ['type'],
         },
@@ -134,6 +135,9 @@ export async function runTool(name: string, input: Record<string, unknown>, tmdb
       const max = asInt(input.max_year)
       if (min) params[`${dateKey}.gte`] = `${min}-01-01`
       if (max) params[`${dateKey}.lte`] = `${max}-12-31`
+      const runtime = asInt(input.max_runtime)
+      // ponytail: TMDB's TV runtime is per episode, so the cap only applies to movies.
+      if (runtime && type === 'movie') params['with_runtime.lte'] = runtime
       return { titles: toTitles(results(await tmdb(`/discover/${type}`, params)), type) }
     }
     case 'similar_to': {

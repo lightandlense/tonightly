@@ -1,0 +1,53 @@
+[
+ {
+  "id": "clear-01",
+  "human": 4,
+  "judge": 4.75
+ },
+ {
+  "id": "clear-05",
+  "human": 1,
+  "judge": 3.25
+ },
+ {
+  "id": "vague-05",
+  "human": 3,
+  "judge": 4
+ },
+ {
+  "id": "repair-03",
+  "human": 1,
+  "judge": 3.2
+ },
+ {
+  "id": "repair-06",
+  "human": 4,
+  "judge": 2.4,
+  "note": "Russell: not fine with Burlesque (still a musical), but the other two were right, so partial credit."
+ },
+ {
+  "id": "halluc-01",
+  "human": 4,
+  "judge": 5
+ },
+ {
+  "id": "halluc-04",
+  "human": 1,
+  "judge": 2.75
+ },
+ {
+  "id": "scope-03",
+  "human": 5,
+  "judge": 4.75
+ },
+ {
+  "id": "memory-01",
+  "human": 5,
+  "judge": 4
+ },
+ {
+  "id": "memory-02",
+  "human": 1,
+  "judge": 3.75
+ }
+]

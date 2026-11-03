@@ -30,6 +30,14 @@ describe('runTool', () => {
     expect(urls[0].searchParams.get('with_genres')).toBe('35')
   })
 
+  it('passes a movie runtime cap, and ignores it for TV', async () => {
+    const { urls, tmdb } = capture()
+    await runTool('discover_titles', { type: 'movie', max_runtime: 90 }, tmdb)
+    await runTool('discover_titles', { type: 'tv', max_runtime: 90 }, tmdb)
+    expect(urls[0].searchParams.get('with_runtime.lte')).toBe('90')
+    expect(urls[1].searchParams.has('with_runtime.lte')).toBe(false)
+  })
+
   it('rejects unknown tools', async () => {
     await expect(runTool('delete_everything', {}, capture().tmdb)).rejects.toThrow(/Unknown tool/)
   })

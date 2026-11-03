@@ -48,6 +48,9 @@ const refKey = (r: Ref) => `${r.type}-${r.id}`
 
 export async function runTurn(opts: { session: Session; message: string; system: string; converse: Converse; tmdb: TmdbGet }): Promise<TurnResult> {
   const seen = { ...opts.session.seen }
+  // Picks must come from this turn's lookups, so a correction ("no musicals") always gets a fresh search.
+  // Opening a title can still use anything seen earlier ("open the first one").
+  const fresh = new Set<string>()
   // Converse needs roles to alternate. A turn that ended on tool results leaves a user message last, so join onto it.
   const prev = opts.session.messages
   const last = prev.at(-1)
@@ -80,16 +83,19 @@ export async function runTurn(opts: { session: Session; message: string; system:
           if (tu.name === 'show_picks') {
             // Grounding: only titles a tool returned this session reach the screen.
             const refs = (Array.isArray(tu.input.picks) ? tu.input.picks : []) as Ref[]
-            const bad = refs.map(refKey).filter((k) => !seen[k])
+            const bad = refs.map(refKey).filter((k) => !fresh.has(k))
             dropped.push(...bad)
-            picks = refs.map((r) => seen[refKey(r)]).filter((t): t is Title => !!t).slice(0, 3)
+            picks = refs.map((r) => (fresh.has(refKey(r)) ? seen[refKey(r)] : undefined)).filter((t): t is Title => !!t).slice(0, 3)
             const o = tu.input.open as Ref | undefined
             open = o ? (seen[refKey(o)] ?? null) : null
             if (o && !open) dropped.push(refKey(o))
-            return done({ shown: picks.map((t) => t.name), rejected: bad.length ? `${bad.join(', ')} not found by a tool, not shown` : undefined })
+            return done({ shown: picks.map((t) => t.name), rejected: bad.length ? `${bad.join(', ')} not returned by a lookup this turn, not shown. Search again to show it.` : undefined })
           }
           const out = await runTool(tu.name, tu.input, opts.tmdb)
-          for (const t of out.titles) seen[titleKey(t)] = t
+          for (const t of out.titles) {
+            seen[titleKey(t)] = t
+            fresh.add(titleKey(t))
+          }
           return done({ results: out.titles.slice(0, 8).map(compact), ...out.extra })
         } catch (e) {
           console.error('tool failed', tu.name, e)
@@ -97,7 +103,9 @@ export async function runTurn(opts: { session: Session; message: string; system:
         }
       }),
     )
-    messages.push({ role: 'user', content: results })
+    // Before the last round, tell the model to stop looking things up, so a long hunt still ends in an answer.
+    const last = round === MAX_ROUNDS - 2 ? [{ text: 'No more lookups left this turn. Answer now with what you have.' }] : []
+    messages.push({ role: 'user', content: [...results, ...last] })
   }
 
   const reply = ended ? said : ''

@@ -58,6 +58,22 @@ describe('runTurn', () => {
     expect(r.open?.name).toBe('Space Ride')
   })
 
+  it('only shows picks looked up this turn, but can open earlier ones', async () => {
+    const first = await turn(script(use('search_titles', { query: 'space' }), say('Found one.')))
+    const r = await turn(script(use('show_picks', { picks: [{ type: 'movie', id: 1 }], open: { type: 'movie', id: 1 } }), say('Here.')), first.session)
+    expect(r.picks).toEqual([])
+    expect(r.dropped).toEqual(['movie-1'])
+    expect(r.open?.name).toBe('Space Ride')
+  })
+
+  it('tells the model to answer before the last round', async () => {
+    const converse = vi.fn<Converse>(async () => use('search_titles', { query: 'again' }))
+    await turn(converse)
+    // The messages array is shared and grows after each call, so check the nudge was sent exactly once.
+    const msgs = converse.mock.calls.at(-1)![0].messages
+    expect(msgs.filter((m) => m.content.some((b) => 'text' in b && b.text.startsWith('No more lookups')))).toHaveLength(1)
+  })
+
   it('reports a failed tool to the model instead of crashing', async () => {
     const converse = vi.fn(script(use('search_titles', { query: 'x' }), say('Search is down.')))
     const r = await turn(converse, empty(), async () => {

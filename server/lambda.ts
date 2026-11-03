@@ -1,6 +1,6 @@
 // AWS Lambda entry (Function URL behind CloudFront). Serves POST /api/chat and GET /api/tmdb/*.
 import { createHash, timingSafeEqual } from 'node:crypto'
-import system from '../prompts/system-v1.md?raw'
+import system from '../prompts/system-v3.md?raw'
 import { makeConverse } from './bedrock'
 import { makeDynamo } from './dynamo'
 import { handleChat, type Deps } from './handler'
