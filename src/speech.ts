@@ -15,6 +15,14 @@ type RecognitionCtor = new () => Recognition
 const w = globalThis as unknown as { SpeechRecognition?: RecognitionCtor; webkitSpeechRecognition?: RecognitionCtor }
 const Ctor = w.SpeechRecognition ?? w.webkitSpeechRecognition
 
+const ERRORS: Record<string, string> = {
+  'not-allowed': 'Microphone is blocked. Allow it in the address bar to talk.',
+  'service-not-allowed': 'Microphone is blocked. Allow it in the address bar to talk.',
+  'audio-capture': 'No microphone found.',
+  network: "Couldn't reach the browser's speech service. Try Chrome or Edge.",
+  'no-speech': "Didn't hear anything. Try again.",
+}
+
 /** Push to talk: start() listens for one phrase and stops by itself on silence. */
 export function useSpeech(onHeard: (text: string) => void) {
   const [listening, setListening] = useState(false)
@@ -26,12 +34,16 @@ export function useSpeech(onHeard: (text: string) => void) {
   })
 
   const start = useCallback(() => {
-    if (!Ctor || rec.current) return
+    if (!Ctor) {
+      setError("This browser can't do speech to text. Try Chrome, Edge or Safari, or type instead.")
+      return
+    }
+    if (rec.current) return
     const r = new Ctor()
     r.lang = 'en-US'
     r.interimResults = false
     r.onresult = (e) => heard.current(e.results[0][0].transcript)
-    r.onerror = (e) => setError(e.error === 'not-allowed' ? 'Microphone is blocked. Allow it in the browser to talk.' : "Didn't catch that. Try again.")
+    r.onerror = (e) => setError(ERRORS[e.error] ?? "Didn't catch that. Try again.")
     r.onend = () => {
       rec.current = null
       setListening(false)

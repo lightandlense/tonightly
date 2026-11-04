@@ -83,7 +83,7 @@ export function Chat() {
           <div className="chat-head-actions">
             {canSay && (
               <FocusButton focusKey="chat-voice" onPress={toggleVoice} pressed={voice}>
-                Voice {voice ? 'on' : 'off'}
+                Read aloud: {voice ? 'on' : 'off'}
               </FocusButton>
             )}
             <FocusButton focusKey="chat-close" onPress={close}>
@@ -110,11 +110,9 @@ export function Chat() {
         {speech.error && <p className="chat-note" role="alert">{speech.error}</p>}
         <div className="chat-compose">
           <ChatInput value={text} onChange={setText} onSubmit={() => send(text)} />
-          {speech.supported && (
-            <FocusButton focusKey="chat-mic" onPress={speech.listening ? speech.stop : speech.start} primary={speech.listening}>
-              {speech.listening ? 'Listening… stop' : 'Speak'}
-            </FocusButton>
-          )}
+          <FocusButton focusKey="chat-mic" onPress={speech.listening ? speech.stop : speech.start} primary={speech.listening}>
+            {speech.listening ? 'Listening… stop' : '🎤 Speak'}
+          </FocusButton>
         </div>
       </motion.aside>
     </FocusContext.Provider>

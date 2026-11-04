@@ -2,7 +2,7 @@
 
 Tonightly is a TV-style "what should I watch tonight" prototype. You browse with the arrow keys like a remote, and you can ask an assistant for picks in plain language: "something funny but not dumb", "no, not a musical", "is Inception 2 on Netflix?". The assistant runs on Claude Haiku 4.5 through AWS Bedrock and looks titles up in TMDB with tool calls.
 
-Live: https://tonightly.lightandlense.com. Code: https://github.com/lightandlense/tonightly.
+Live: https://tonightly.lightandlense.com. Demo video: https://youtu.be/JaqHzm6_Jd8. Code: https://github.com/lightandlense/tonightly.
 
 This page is about one question: **how do you know an assistant like this is getting better, and not just different?**
 

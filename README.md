@@ -2,7 +2,7 @@
 
 A TV-style "what should I watch tonight" prototype. You browse with the arrow keys like a TV remote, and ask a conversational assistant built on AWS Bedrock (Claude) for picks by typing or talking.
 
-Live at https://tonightly.lightandlense.com. Case study: [docs/case-study.md](docs/case-study.md).
+Live at https://tonightly.lightandlense.com. Demo video: https://youtu.be/JaqHzm6_Jd8. Case study: [docs/case-study.md](docs/case-study.md).
 
 ## Evals
 
